@@ -1,0 +1,107 @@
+Now create a simple filter to log all requests passing through the gateway:Now create a fallback controller for when a service is down:Now update the README:Here is your complete final project with all 6 services. Now let me explain everything step by step.
+
+---
+
+## What is Inside the ZIP
+
+```
+ecommerce-final/
+├── eureka-server/         → Port 8761  (same as before)
+├── api-gateway/           → Port 8080  ← NEW
+├── item-service/          → Port 8081  (same as before)
+├── inventory-service/     → Port 8082  (same as before)
+├── notification-service/  → Port 8083  (same as before)
+└── audit-service/         → Port 8084  (same as before)
+```
+
+---
+
+## What Was Added — API Gateway Has Only 4 Files
+
+```
+api-gateway/
+├── pom.xml                         ← dependencies
+├── src/main/resources/
+│   └── application.yml             ← routing rules (heart of gateway)
+└── src/main/java/com/ecommerce/apigateway/
+    ├── ApiGatewayApplication.java  ← main class
+    ├── filter/
+    │   └── RequestLoggingFilter.java  ← logs every request
+    └── controller/
+        └── FallbackController.java    ← shows message if service is down
+```
+
+---
+
+## Step by Step — How to Set Up in STS
+
+**Step 1 — Import all 6 projects**
+`File → Import → Maven → Existing Maven Projects → select ecommerce-final folder → check all 6 → Finish`
+
+**Step 2 — Update MySQL password** in all 4 service `application.properties` files
+
+**Step 3 — Start in this EXACT ORDER**
+
+```
+1st → eureka-server       (wait until fully started)
+2nd → api-gateway         (wait until registered in Eureka)
+3rd → item-service
+4th → inventory-service
+5th → notification-service
+6th → audit-service
+```
+
+**Step 4 — Check Eureka Dashboard**
+Open `http://localhost:8761` — you should see all 5 registered:
+
+```
+API-GATEWAY           UP
+ITEM-SERVICE          UP
+INVENTORY-SERVICE     UP
+NOTIFICATION-SERVICE  UP
+AUDIT-SERVICE         UP
+```
+
+**Step 5 — Test through Gateway using port 8080**
+
+```
+Before Gateway:   http://localhost:8081/api/items
+After Gateway:    http://localhost:8080/api/items   ← use this now
+```
+
+---
+
+## How the Routing Works — Very Simple
+
+The `application.yml` has these rules:
+
+```
+If URL is  /api/items/**        → send to item-service
+If URL is  /api/inventory/**    → send to inventory-service
+If URL is  /api/notifications/** → send to notification-service
+If URL is  /api/audit-logs/**   → send to audit-service
+```
+
+The `lb://item-service` means — look up item-service address from Eureka. This is why Eureka and Gateway work together perfectly.
+
+---
+
+## The Complete Flow Now
+
+```
+YOU (Postman)
+    ↓
+http://localhost:8080/api/items    ← single port
+    ↓
+API Gateway (8080)
+    ↓ checks routing rules
+    ↓ asks Eureka — where is item-service?
+    ↓ Eureka says — 192.168.x.x:8081
+    ↓
+Item Service (8081)
+    ↓ JWT check → Controller → Service → Repository → MySQL
+    ↓
+Response back to API Gateway
+    ↓
+Response back to YOU
+```

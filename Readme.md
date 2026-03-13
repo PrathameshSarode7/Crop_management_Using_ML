@@ -1,22 +1,5 @@
-package com.itemmanagement.itemservice.config;
+Whitelabel Error Page
+This application has no configured error view, so you are seeing this as a fallback.
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.web.SecurityFilterChain;
-
-@Configuration
-@EnableWebSecurity
-public class SecurityConfig {
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll() // Gateway already authenticated the user
-            );
-        return http.build();
-    }
-}
+Fri Mar 13 21:58:25 IST 2026
+[f55a3c9c-6] There was an unexpected error (type=Not Found, status=404).
